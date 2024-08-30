@@ -1,0 +1,53 @@
+import random
+
+# Definisikan guru dan mata pelajaran
+teachers = {
+    'Guru A': ['Matematika', 'Fisika'],
+    'Guru B': ['Biologi', 'Kimia'],
+    'Guru C': ['Sejarah', 'Geografi'],
+    'Guru D': ['Bahasa Indonesia', 'Bahasa Inggris']
+}
+
+# Definisikan slot waktu (misalnya 5 hari, setiap hari 5 jam pelajaran)
+days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']
+slots_per_day = 5
+total_slots = len(days) * slots_per_day
+
+# Definisikan kelas dan mata pelajaran mereka
+classes = {
+    'Kelas 10': ['Matematika', 'Fisika', 'Biologi', 'Sejarah', 'Bahasa Indonesia'],
+    'Kelas 11': ['Matematika', 'Kimia', 'Geografi', 'Sejarah', 'Bahasa Inggris'],
+    'Kelas 12': ['Fisika', 'Biologi', 'Kimia', 'Geografi', 'Bahasa Indonesia']
+}
+
+# Membuat slot waktu
+schedule = {day: {slot: None for slot in range(1, slots_per_day + 1)} for day in days}
+
+def find_available_teacher(subject):
+    for teacher, subjects in teachers.items():
+        if subject in subjects:
+            return teacher
+    return None
+
+# Mengisi jadwal
+for class_name, subjects in classes.items():
+    for subject in subjects:
+        assigned = False
+        while not assigned:
+            day = random.choice(days)
+            slot = random.randint(1, slots_per_day)
+            if schedule[day][slot] is None:
+                teacher = find_available_teacher(subject)
+                if teacher:
+                    schedule[day][slot] = (class_name, subject, teacher)
+                    assigned = True
+
+# Menampilkan jadwal
+for day, slots in schedule.items():
+    print(f"\n{day}:")
+    for slot, class_info in slots.items():
+        if class_info:
+            class_name, subject, teacher = class_info
+            print(f"  Slot {slot}: {class_name} - {subject} (Guru: {teacher})")
+        else:
+            print(f"  Slot {slot}: Kosong")
