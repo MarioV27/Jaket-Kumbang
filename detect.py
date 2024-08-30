@@ -161,7 +161,7 @@ def run(
                     area=[]
                     jumlahmanusia = 0
                     for manusia in det:
-                        if manusia[5] == 7 and manusia[3]>270:
+                        if manusia[5] == 7 and manusia[3]>800:
                             area.append(manusia[0])
                             area.append(manusia[1])
                             area.append(manusia[2])
