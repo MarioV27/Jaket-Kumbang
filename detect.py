@@ -28,6 +28,7 @@ Usage - formats:
                                  yolov5s_paddle_model       # PaddlePaddle
 """
 
+import csv
 import argparse
 import os
 import platform
@@ -81,7 +82,7 @@ def run(
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
 ):
-    try:
+
         source = str(source)
         save_img = not nosave and not source.endswith('.txt')  # save inference images
         is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -147,7 +148,7 @@ def run(
 
                 p = Path(p)  # to Path
                 save_path = str(save_dir / p.name)  # im.jpg
-                txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # im.txt
+                txt_path = str(save_dir / p.stem) + (".csv") # im.txt
                 s += '%gx%g ' % im.shape[2:]  # print string
                 gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
                 imc = im0.copy() if save_crop else im0  # for save_crop
@@ -185,16 +186,24 @@ def run(
                                 orangke[f'orangke_{x}'].append(deteksilist[5])
                                 break
 
-                    for key, value in orangke.items():
-                        if 5 in value and len(value)>1:
-                            other_value = [value for value in value if value != 5]
-                            # if other_value[0] not in tersangka:
-                            #     tersangka.append(other_value[0])
-                            if names[other_value[0]] not in tersangka:
-                                tersangka.append(names[other_value[0]])
+                    with open(txt_path,mode='a',newline='') as f:
+                        writer = csv.writer(f)
+                        if frame == 1:
+                            writer.writerow(["nama " "tanggal " "waktu"])
+                        for key, value in orangke.items():
+                            if 5 in value and len(value)>1:
+                                other_value = [value for value in value if value != 5]
+                                # if other_value[0] not in tersangka:
+                                #     tersangka.append(other_value[0])
+                                if names[other_value[0]] not in tersangka:
+                                    row_text = "{}{}{}".format(
+                                        names[other_value[0]],
+                                        " ",
+                                        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                    )
+                                    writer.writerow([row_text])
+                                    tersangka.append(names[other_value[0]])
                             # waktu = datetime.datetime.now()
-                            # print(other_value)
-                            # tersangka.append(names[other_value[0]])
                             # print(names[other_value[0]],"%s %s %s:%s"%(waktu.day,waktu.month,waktu.hour,waktu.minute))
                     
                     # Print results
@@ -262,8 +271,7 @@ def run(
             LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
         if update:
             strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
-    except:
-        print("error")
+
 
 
 def parse_opt():
